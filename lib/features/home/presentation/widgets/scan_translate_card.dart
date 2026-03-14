@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:bitirme_projesi/common/helper/navigator/app_navigator.dart';
 import 'package:bitirme_projesi/core/configs/theme/app_colors.dart';
+import 'package:bitirme_projesi/features/text_recognition/presentation/camera_screen.dart';
 
 class ScanTranslateCard extends StatefulWidget {
   const ScanTranslateCard({super.key});
@@ -179,7 +181,9 @@ class _ScanTranslateCardState extends State<ScanTranslateCard>
           ),
         ),
         child: ElevatedButton.icon(
-          onPressed: () {},
+          onPressed: () {
+            AppNavigator.push(context, const CameraScreen());
+          },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.transparent,
             shadowColor: Colors.transparent,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:bitirme_projesi/common/helper/navigator/app_navigator.dart';
 import 'package:bitirme_projesi/core/configs/theme/app_colors.dart';
+import 'package:bitirme_projesi/features/text_recognition/presentation/camera_screen.dart';
 
 class QuickActions extends StatelessWidget {
   const QuickActions({super.key});
@@ -24,11 +26,15 @@ class QuickActions extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _ActionCard(
-                  icon: Icons.camera_alt_outlined,
-                  label: 'Kamera',
-                  color: AppColors.accentBlue,
-                  onTap: () {},
+                child: Builder(
+                  builder: (context) => _ActionCard(
+                    icon: Icons.camera_alt_outlined,
+                    label: 'Kamera',
+                    color: AppColors.accentBlue,
+                    onTap: () {
+                      AppNavigator.push(context, const CameraScreen());
+                    },
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
