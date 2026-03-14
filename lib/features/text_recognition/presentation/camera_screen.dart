@@ -1,6 +1,8 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:bitirme_projesi/core/configs/theme/app_colors.dart';
+import 'package:bitirme_projesi/features/text_recognition/presentation/widgets/camera_top_bar.dart';
+import 'package:bitirme_projesi/features/text_recognition/presentation/widgets/camera_bottom_bar.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
@@ -13,6 +15,9 @@ class _CameraScreenState extends State<CameraScreen> {
   CameraController? _controller;
   bool _isInitialized = false;
   String? _error;
+  bool _isFlashOn = false;
+  String _sourceLanguage = 'Otomatik';
+  String _targetLanguage = 'Türkçe';
 
   @override
   void initState() {
@@ -51,6 +56,7 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       body: _buildBody(),
     );
   }
@@ -80,21 +86,33 @@ class _CameraScreenState extends State<CameraScreen> {
       children: [
         CameraPreview(_controller!),
         SafeArea(
-          child: Align(
-            alignment: Alignment.topLeft,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: IconButton(
-                onPressed: () => Navigator.pop(context),
-                style: IconButton.styleFrom(
-                  backgroundColor: Colors.black38,
-                ),
-                icon: const Icon(
-                  Icons.arrow_back,
-                  color: AppColors.textPrimary,
-                ),
+          child: Column(
+            children: [
+              CameraTopBar(
+                isFlashOn: _isFlashOn,
+                sourceLanguage: _sourceLanguage,
+                targetLanguage: _targetLanguage,
+                onBack: () => Navigator.pop(context),
+                onFlashToggle: () {
+                  setState(() => _isFlashOn = !_isFlashOn);
+                },
+                onSwapLanguages: () {
+                  setState(() {
+                    final temp = _sourceLanguage;
+                    _sourceLanguage = _targetLanguage;
+                    _targetLanguage = temp;
+                  });
+                },
+                onSourceLanguageTap: () {},
+                onTargetLanguageTap: () {},
               ),
-            ),
+              const Spacer(),
+              CameraBottomBar(
+                onGalleryTap: () {},
+                onCapture: () {},
+              ),
+              const SizedBox(height: 16),
+            ],
           ),
         ),
       ],
