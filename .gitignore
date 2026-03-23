@@ -46,3 +46,7 @@ app.*.map.json
 
 # Cursor related
 .cursor/
+
+# Local environment (secrets)
+.env
+.env.*

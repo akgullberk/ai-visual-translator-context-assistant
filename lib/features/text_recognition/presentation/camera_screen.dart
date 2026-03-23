@@ -1,12 +1,15 @@
+import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:bitirme_projesi/core/configs/theme/app_colors.dart';
 import 'package:bitirme_projesi/features/text_recognition/presentation/cubit/text_recognition_cubit.dart';
 import 'package:bitirme_projesi/features/text_recognition/presentation/cubit/text_recognition_state.dart';
-import 'package:bitirme_projesi/features/text_recognition/presentation/widgets/camera_top_bar.dart';
 import 'package:bitirme_projesi/features/text_recognition/presentation/widgets/camera_bottom_bar.dart';
+import 'package:bitirme_projesi/features/text_recognition/presentation/widgets/camera_top_bar.dart';
 import 'package:bitirme_projesi/service_locator.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:bitirme_projesi/features/translation/domain/usecases/translate_text_usecase.dart';
+import 'package:bitirme_projesi/features/cultural_context/domain/usecases/get_cultural_context_usecase.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
@@ -18,6 +21,9 @@ class CameraScreen extends StatefulWidget {
 class _CameraScreenState extends State<CameraScreen> {
   CameraController? _controller;
   late final TextRecognitionCubit _textRecognitionCubit;
+  late final TranslateTextUseCase _translateTextUseCase;
+  late final GetCulturalContextUseCase _getCulturalContextUseCase;
+  bool _isProcessing = false;
   bool _isInitialized = false;
   String? _error;
   bool _isFlashOn = false;
@@ -28,6 +34,8 @@ class _CameraScreenState extends State<CameraScreen> {
   void initState() {
     super.initState();
     _textRecognitionCubit = sl<TextRecognitionCubit>();
+    _translateTextUseCase = sl<TranslateTextUseCase>();
+    _getCulturalContextUseCase = sl<GetCulturalContextUseCase>();
     _initCamera();
   }
 
@@ -60,6 +68,17 @@ class _CameraScreenState extends State<CameraScreen> {
     super.dispose();
   }
 
+  String _getDeepLTargetLangCode() {
+    switch (_targetLanguage) {
+      case 'Türkçe':
+        return 'TR';
+      case 'English':
+        return 'EN';
+      default:
+        return 'TR';
+    }
+  }
+
   Future<void> _captureAndRecognize() async {
     if (_controller == null || !_controller!.value.isInitialized) {
       return;
@@ -90,12 +109,51 @@ class _CameraScreenState extends State<CameraScreen> {
             context,
           ).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
         }
+
+        if (state.status == TextRecognitionStatus.success &&
+            state.recognizedText.trim().isNotEmpty) {
+          final recognizedText = state.recognizedText.trim();
+
+          unawaited(_processText(recognizedText));
+        }
       },
       child: Scaffold(
         backgroundColor: Colors.black,
         body: _buildBody(),
       ),
     );
+  }
+
+  Future<void> _processText(String recognizedText) async {
+    if (_isProcessing) return;
+    _isProcessing = true;
+
+    try {
+    final translationResult = await _translateTextUseCase(
+      text: recognizedText,
+      targetLang: _getDeepLTargetLangCode(),
+    );
+
+    if (translationResult.isSuccess && translationResult.data != null) {
+      debugPrint('TRANSLATION RESULT: ${translationResult.data!.value}');
+    } else {
+      debugPrint('TRANSLATION ERROR: '
+          '${translationResult.failure?.message ?? 'Bilinmeyen hata'}');
+    }
+
+    final culturalResult = await _getCulturalContextUseCase(
+      text: recognizedText,
+    );
+
+    if (culturalResult.isSuccess && culturalResult.data != null) {
+      debugPrint('CULTURAL_CONTEXT RESULT: ${culturalResult.data!.value}');
+    } else {
+      debugPrint('CULTURAL_CONTEXT ERROR: '
+          '${culturalResult.failure?.message ?? 'Bilinmeyen hata'}');
+    }
+    } finally {
+      _isProcessing = false;
+    }
   }
 
   Widget _buildBody() {

@@ -1,10 +1,12 @@
 import 'package:bitirme_projesi/core/configs/theme/app_theme.dart';
+import 'package:bitirme_projesi/core/configs/env/env_loader.dart';
 import 'package:bitirme_projesi/features/home/presentation/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:bitirme_projesi/service_locator.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await EnvLoader.load();
   await setupServiceLocator();
   runApp(const MyApp());
 }
