@@ -14,7 +14,10 @@ class TextRecognitionRepositoryImpl implements TextRecognitionRepository {
   Future<Result<RecognizedTextEntity>> recognizeText(String imagePath) async {
     try {
       final text = await _dataSource.recognizeText(imagePath);
-      final model = RecognizedTextModel(value: text);
+      final model = RecognizedTextModel(
+        value: text.value,
+        items: text.items,
+      );
       return Result.success(model);
     } catch (_) {
       return Result.fail(const Failure('Metin tanıma sırasında bir hata oluştu.'));

@@ -15,12 +15,14 @@ class TextRecognitionCubit extends Cubit<TextRecognitionState> {
     final result = await _recognizeTextUseCase(imagePath);
 
     if (result.isSuccess && result.data != null) {
-      final text = result.data!.value;
+      final data = result.data!;
+      final text = data.value;
       debugPrint('OCR RESULT: $text');
       emit(
         state.copyWith(
           status: TextRecognitionStatus.success,
           recognizedText: text,
+          recognizedItems: data.items,
           errorMessage: null,
         ),
       );
