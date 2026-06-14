@@ -25,7 +25,7 @@ class GeminiEnv {
     }
 
     // Gemini 2 Flash (senin istediğin).
-    return 'gemini-2.0-flash';
+    return 'gemini-2.5-flash';
   }
 }
 

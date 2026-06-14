@@ -71,7 +71,7 @@ Metin: "$text"
         ],
         'generationConfig': {
           'temperature': 0.2,
-          'maxOutputTokens': 300,
+          'maxOutputTokens': 1024,
         },
       }),
     );
@@ -105,13 +105,13 @@ Metin: "$text"
     final raw = textResponse.trim();
 
     // Gemini bazen JSON’u codeblock ile sarabiliyor; onu temizliyoruz.
-    final fenced = RegExp(r'```(?:json)?\\s*([\\s\\S]*?)```', multiLine: true)
+    final fenced = RegExp(r'```(?:json)?\s*([\s\S]*?)```', multiLine: true)
         .firstMatch(raw)
         ?.group(1)
         ?.trim();
     final candidateJson = fenced ?? raw;
 
-    final jsonMatch = RegExp(r'\\{[\\s\\S]*\\}').firstMatch(candidateJson);
+    final jsonMatch = RegExp(r'\{[\s\S]*\}').firstMatch(candidateJson);
     final jsonText = (jsonMatch?.group(0) ?? candidateJson).trim();
 
     try {

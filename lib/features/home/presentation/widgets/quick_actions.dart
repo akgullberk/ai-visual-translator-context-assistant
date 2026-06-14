@@ -1,10 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:bitirme_projesi/common/helper/navigator/app_navigator.dart';
 import 'package:bitirme_projesi/core/configs/theme/app_colors.dart';
+import 'package:bitirme_projesi/features/history/presentation/history_page.dart';
 import 'package:bitirme_projesi/features/text_recognition/presentation/camera_screen.dart';
+import 'package:image_picker/image_picker.dart';
 
 class QuickActions extends StatelessWidget {
   const QuickActions({super.key});
+
+  static Future<void> _openGalleryAndRecognize(BuildContext context) async {
+    try {
+      final picked = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 100,
+      );
+      if (!context.mounted || picked == null) return;
+
+      AppNavigator.push(
+        context,
+        CameraScreen(initialImagePath: picked.path),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Galeriden görüntü seçilemedi: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,20 +61,26 @@ class QuickActions extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _ActionCard(
-                  icon: Icons.photo_library_outlined,
-                  label: 'Galeri',
-                  color: AppColors.accentBlue,
-                  onTap: () {},
+                child: Builder(
+                  builder: (context) => _ActionCard(
+                    icon: Icons.photo_library_outlined,
+                    label: 'Galeri',
+                    color: AppColors.accentBlue,
+                    onTap: () => _openGalleryAndRecognize(context),
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _ActionCard(
-                  icon: Icons.history_rounded,
-                  label: 'Geçmiş',
-                  color: AppColors.accentPurple,
-                  onTap: () {},
+                child: Builder(
+                  builder: (context) => _ActionCard(
+                    icon: Icons.history_rounded,
+                    label: 'Geçmiş',
+                    color: AppColors.accentPurple,
+                    onTap: () {
+                      AppNavigator.push(context, const HistoryPage());
+                    },
+                  ),
                 ),
               ),
             ],

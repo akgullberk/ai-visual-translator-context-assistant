@@ -1,6 +1,7 @@
 import 'package:bitirme_projesi/features/text_recognition/data/datasources/text_recognition_data_source.dart';
 import 'package:bitirme_projesi/features/text_recognition/data/repositories/text_recognition_repository_impl.dart';
 import 'package:bitirme_projesi/features/text_recognition/domain/repositories/text_recognition_repository.dart';
+import 'package:bitirme_projesi/features/text_recognition/domain/usecases/recognize_live_frame_usecase.dart';
 import 'package:bitirme_projesi/features/text_recognition/domain/usecases/recognize_text_usecase.dart';
 import 'package:bitirme_projesi/features/text_recognition/presentation/cubit/text_recognition_cubit.dart';
 import 'package:get_it/get_it.dart';
@@ -19,9 +20,20 @@ import 'package:bitirme_projesi/features/cultural_context/domain/repositories/cu
 import 'package:bitirme_projesi/features/cultural_context/domain/usecases/get_cultural_context_usecase.dart';
 import 'package:bitirme_projesi/features/cultural_context/presentation/cubit/cultural_context_cubit.dart';
 
+import 'package:bitirme_projesi/features/history/data/datasources/history_local_data_source.dart';
+import 'package:bitirme_projesi/features/history/data/repositories/history_repository_impl.dart';
+import 'package:bitirme_projesi/features/history/domain/repositories/history_repository.dart';
+import 'package:bitirme_projesi/features/history/domain/usecases/get_history_entries_usecase.dart';
+import 'package:bitirme_projesi/features/history/domain/usecases/save_history_entry_usecase.dart';
+import 'package:bitirme_projesi/features/history/presentation/cubit/history_cubit.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 final sl = GetIt.instance;
 
 Future<void> setupServiceLocator() async {
+  final sharedPreferences = await SharedPreferences.getInstance();
+  sl.registerLazySingleton<SharedPreferences>(() => sharedPreferences);
+
   sl.registerLazySingleton<http.Client>(() => http.Client());
 
   sl.registerLazySingleton<TextRecognizer>(
@@ -38,6 +50,10 @@ Future<void> setupServiceLocator() async {
 
   sl.registerLazySingleton<RecognizeTextUseCase>(
     () => RecognizeTextUseCase(sl<TextRecognitionRepository>()),
+  );
+
+  sl.registerLazySingleton<RecognizeLiveFrameUseCase>(
+    () => RecognizeLiveFrameUseCase(sl<TextRecognitionRepository>()),
   );
 
   sl.registerFactory<TextRecognitionCubit>(
@@ -74,5 +90,25 @@ Future<void> setupServiceLocator() async {
 
   sl.registerFactory<CulturalContextCubit>(
     () => CulturalContextCubit(sl<GetCulturalContextUseCase>()),
+  );
+
+  sl.registerLazySingleton<HistoryLocalDataSource>(
+    () => HistoryLocalDataSourceImpl(sl<SharedPreferences>()),
+  );
+
+  sl.registerLazySingleton<HistoryRepository>(
+    () => HistoryRepositoryImpl(sl<HistoryLocalDataSource>()),
+  );
+
+  sl.registerLazySingleton<GetHistoryEntriesUseCase>(
+    () => GetHistoryEntriesUseCase(sl<HistoryRepository>()),
+  );
+
+  sl.registerLazySingleton<SaveHistoryEntryUseCase>(
+    () => SaveHistoryEntryUseCase(sl<HistoryRepository>()),
+  );
+
+  sl.registerFactory<HistoryCubit>(
+    () => HistoryCubit(sl<GetHistoryEntriesUseCase>()),
   );
 }

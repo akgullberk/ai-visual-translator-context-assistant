@@ -1,5 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:bitirme_projesi/common/helper/navigator/app_navigator.dart';
 import 'package:bitirme_projesi/core/configs/theme/app_colors.dart';
+import 'package:bitirme_projesi/features/history/presentation/history_page.dart';
+
+String _greetingForTimeOfDay() {
+  final hour = DateTime.now().hour;
+  if (hour >= 5 && hour < 12) {
+    return 'Günaydın 👋';
+  }
+  if (hour >= 12 && hour < 18) {
+    return 'İyi günler 👋';
+  }
+  return 'İyi akşamlar 👋';
+}
 
 class HomeHeader extends StatelessWidget {
   const HomeHeader({super.key});
@@ -11,15 +24,18 @@ class HomeHeader extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Column(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Günaydın 👋',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 17),
+                _greetingForTimeOfDay(),
+                style: const TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 17,
+                ),
               ),
-              SizedBox(height: 4),
-              Text(
+              const SizedBox(height: 4),
+              const Text(
                 'Visual Translator',
                 style: TextStyle(
                   color: AppColors.textPrimary,
@@ -31,7 +47,12 @@ class HomeHeader extends StatelessWidget {
           ),
           Row(
             children: [
-              _HeaderIconButton(icon: Icons.access_time, onPressed: () {}),
+              _HeaderIconButton(
+                icon: Icons.history_rounded,
+                onPressed: () {
+                  AppNavigator.push(context, const HistoryPage());
+                },
+              ),
               const SizedBox(width: 10),
               _HeaderIconButton(
                 icon: Icons.settings_outlined,

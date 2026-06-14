@@ -1,8 +1,12 @@
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import 'package:bitirme_projesi/features/text_recognition/data/mappers/camera_image_mapper.dart';
 import 'package:bitirme_projesi/features/text_recognition/data/models/recognized_text_model.dart';
+import 'package:bitirme_projesi/features/text_recognition/domain/entities/live_recognition_frame.dart';
 
 abstract class TextRecognitionDataSource {
   Future<RecognizedTextModel> recognizeText(String imagePath);
+
+  Future<RecognizedTextModel> recognizeLiveFrame(LiveRecognitionFrame frame);
 }
 
 class TextRecognitionDataSourceImpl implements TextRecognitionDataSource {
@@ -13,6 +17,16 @@ class TextRecognitionDataSourceImpl implements TextRecognitionDataSource {
   @override
   Future<RecognizedTextModel> recognizeText(String imagePath) async {
     final inputImage = InputImage.fromFilePath(imagePath);
+    return _processInputImage(inputImage);
+  }
+
+  @override
+  Future<RecognizedTextModel> recognizeLiveFrame(LiveRecognitionFrame frame) async {
+    final inputImage = CameraImageMapper.toInputImage(frame);
+    return _processInputImage(inputImage);
+  }
+
+  Future<RecognizedTextModel> _processInputImage(InputImage inputImage) async {
     final result = await _textRecognizer.processImage(inputImage);
     final items = <RecognizedTextItemModel>[];
 
